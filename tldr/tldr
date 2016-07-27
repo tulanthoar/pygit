@@ -1,0 +1,5 @@
+#!/bin/env bash
+local EXFOLDER=$(python3 ~/pyproj/tldr/tldr.py "$@")
+mv $EXFOLDER ~/apps
+[[ -d ~/apps/${EXFOLDER} ]] && cd ~/apps/${EXFOLDER}
+[[ -e ~/apps/${EXFOLDER}/PKGCONFIG ]] && sudo makepkg -sri
