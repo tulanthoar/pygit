@@ -5,15 +5,6 @@ from sh import Command
 from ewmh import EWMH
 
 
-# def class_is_mapped(hinter, class_name):
-#     '''use ewmh to see if a window with class name is mapped'''
-#     for win in hinter.getClientListStacking():
-#         classnames = win.get_wm_class()
-#         if class_name in classnames:
-#             return True
-#     return False
-
-
 def class_is_visible(hinter, class_name):
     '''check if a window with class_name is currently visible'''
     for win in hinter.getClientListStacking():
@@ -21,9 +12,6 @@ def class_is_visible(hinter, class_name):
             return win.get_wm_state()['state'] == 1
     return None
 
-                # return True
-            # else:
-                # return False
 
 def print_menu(persist):
     '''print menu of available keys'''
