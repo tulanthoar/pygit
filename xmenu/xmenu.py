@@ -51,7 +51,7 @@ def xdomenu():
                    'P': ('pomodoro')}
     xdo = Command('xdotool')
     hinter = EWMH()
-    persistent = False
+    persistent = True
     print_menu(persistent)
     while True:
         char = getchar()
