@@ -62,29 +62,29 @@ def xdomenu():
             echo("\n")
             print_menu(persistent)
             continue
-        elif char == ' ':
-            xdo(['key', 'Menu'])
-            xmc('nextempty')
-            xdo(['key', 'Menu'])
-            continue
         if persistent:
             xmc('minone')
         else:
             xmc('copykill')
-        if char == 'b':
-            vis = class_is_visible(hinter, 'urxv')
-            if vis is None:
-                xmc('byobu')
-                sleep(1)
-            elif vis:
-                xmc('sendbyo')
-            else:
-                xmc('bringbyo')
-        else:
+        try:
             (opts) = char_to_bin[char]
             xmc(opts)
+        except (KeyError):
+            if char == ' ':
+                xdo(['key', 'Menu'])
+                xmc('nextempty')
+                xdo(['key', 'Menu'])
+            elif char == 'b':
+                vis = class_is_visible(hinter, 'urxv')
+                if vis is None:
+                    xmc('byobu')
+                    sleep(1)
+                elif vis:
+                    xmc('sendbyo')
+                else:
+                    xmc('bringbyo')
+        sleep(0.5)
         if persistent:
             xmc('rest')
             continue
-        sleep(0.5)
         xdo(['key', 'Menu'])
