@@ -70,7 +70,7 @@ def xdomenu():
         if persistent:
             xmc('minone')
         else:
-            xmc('suicide')
+            xmc('copykill')
         if char == 'b':
             vis = class_is_visible(hinter, 'urxv')
             if vis is None:
@@ -84,6 +84,7 @@ def xdomenu():
             (opts) = char_to_bin[char]
             xmc(opts)
         if persistent:
-            xdo(['key', 'Menu'])
+            xmc('rest')
             continue
-        raise KeyboardInterrupt
+        sleep(0.5)
+        xdo(['key', 'Menu'])
