@@ -25,7 +25,6 @@ def print_menu(persist):
     echo('  p: perl repl')
     echo('  r: ranger')
     echo('  a: all pads')
-    echo('  b: byobu')
     echo('  P: pomodoro')
     echo('  h: htop')
     echo('  u: urxvt')
@@ -49,7 +48,6 @@ def xdomenu():
                    'p': ('perl'),
                    'r': ('ranger'),
                    'a': ('allpads'),
-                   'b': ('byobu'),
                    'P': ('pomodoro')}
     xdo = Command('xdotool')
     hinter = EWMH()
@@ -57,24 +55,26 @@ def xdomenu():
     print_menu(persistent)
     while True:
         char = getchar()
-        if char == '\t':
-            persistent = not persistent
-            echo("\n")
-            print_menu(persistent)
-            continue
-        if persistent:
-            xmc('minone')
-        else:
-            xmc('copykill')
         try:
             (opts) = char_to_bin[char]
+            if persistent:
+                xmc('minone')
+            else:
+                xmc('copykill')
             xmc(opts)
         except (KeyError):
-            if char == ' ':
-                xdo(['key', 'Menu'])
+            if char == '\t':
+                persistent = not persistent
+                print_menu(persistent)
+                continue
+            elif char == ' ':
                 xmc('nextempty')
-                xdo(['key', 'Menu'])
-            elif char == 'b':
+                continue
+            if char == 'b':
+                if persistent:
+                    xmc('minone')
+                else:
+                    xmc('copykill')
                 vis = class_is_visible(hinter, 'urxv')
                 if vis is None:
                     xmc('byobu')
