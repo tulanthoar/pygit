@@ -1,53 +1,56 @@
 #!/usr/bin/env python
+'''check the flight times for dhl freight flights'''
 from time import sleep
 
 from bs4 import BeautifulSoup
-from requests import Session
+from requests import Session, post
 from requests.exceptions import (HTTPError, MissingSchema, InvalidURL)
 from colorama import init
 from termcolor import colored
-from requests import post
 
 
-def nc(tagl, t):
-    return tagl.find_next(class_=t)
+def find_nc(tagl, tag):
+    '''find the next class with given tag name tag'''
+    return tagl.find_next(class_=tag)
 
 
 def soup_t(soup_text):
+    '''return the flight time given the html text or None if not en route'''
     b_tag = soup_text.body
-    t_tag = nc(nc(b_tag, "track-panel-actualtime"), "track-panel-actualtime")
-    a_tags = nc(b_tag, "track-panel-arrival").a
+    t_tag = find_nc(b_tag, "track-panel-actualtime")
+    t_tag = find_nc(t_tag, "track-panel-actualtime")
+    a_tags = find_nc(b_tag, "track-panel-arrival").a
     arrival = a_tags.text
-    t = t_tag.text
-    panel = nc(b_tag, "track-panel-inner")
-    status = nc(panel, 'smallrow1')
-    print('Arriving in ' + arrival + ' at ' + t)
+    t_text = t_tag.text
+    panel = find_nc(b_tag, "track-panel-inner")
+    status = find_nc(panel, 'smallrow1')
+    print('Arriving in ' + arrival + ' at ' + t_text)
     print(status.text)
     if "En Route" in status.text and 'KSLC' in arrival:
-        return t
+        return t_text
     else:
         return None
 
 
-init()
-inboundRno = ('http://flightaware.com/live/flight/SOO594', '594')
-inbound = ('http://flightaware.com/live/flight/SOO597', '597')
-nightBoi = ('http://flightaware.com/live/flight/AMF1062', '1062')
-nightMhr = ('http://flightaware.com/live/flight/SOO197', '197')
-npyurl = "https://npy.hipchat.com/v2/room/2674348/notification"
-npynottok = "EkpHuaUe6GBYfXf9JFo32UqZ3GJ1AkHbiABr3r40"
+def text_loop():
+    '''send messages when the flights are en route'''
+    init()
+    inbound_rno = ('http://flightaware.com/live/flight/SOO594', '594')
+    inbound = ('http://flightaware.com/live/flight/SOO597', '597')
+    night_boi = ('http://flightaware.com/live/flight/AMF1062', '1062')
+    night_mhr = ('http://flightaware.com/live/flight/SOO197', '197')
 
-flights = (inboundRno, inbound, nightBoi, nightMhr)
-with Session() as ses:
-    print('session has begun')
-    while True:
-        try:
+    npyurl = "https://npy.hipchat.com/v2/room/2674348/notification"
+    flights = (inbound_rno, inbound, night_boi, night_mhr)
+    with Session() as ses:
+        print('session has begun')
+        while True:
             print('------------------------')
-            for f in flights:
+            for flight in flights:
                 try:
-                    p = ses.get(f[0])
+                    page = ses.get(flight[0])
                 except InvalidURL:
-                    print('invalid url, ' + f[0])
+                    print('invalid url, ' + flight[0])
                     break
                 except MissingSchema:
                     print('add http')
@@ -55,22 +58,22 @@ with Session() as ses:
                 except HTTPError:
                     print('http error')
                     break
-                soupIn = BeautifulSoup(p.text, 'html.parser')
-                parts = soupIn.title.string.split('#')
-                fNum = parts[0] + f[1]
-                print(colored(fNum, 'yellow'))
-                arr = soup_t(soupIn)
+                soup_in = BeautifulSoup(page.text, 'html.parser')
+                f_num = soup_in.title.string.split('#')[0] + flight[1]
+                print(colored(f_num, 'yellow'))
+                arr = soup_t(soup_in)
                 if arr:
-                    msg = fNum + ' arrives at ' + arr
+                    msg = f_num + ' arrives at ' + arr
                     print(colored(msg, 'green'))
+                    token = "EkpHuaUe6GBYfXf9JFo32UqZ3GJ1AkHbiABr3r40"
                     npydat = {
-                        'auth_token': npynottok,
+                        'auth_token': token,
                         'notify': 'false',
                         'message_format': 'text',
                         'message': msg}
                     post(npyurl, data=npydat)
                 print('')
             sleep(300)
-        except KeyboardInterrupt:
-            print('breaking..,')
-            break
+
+
+text_loop()
