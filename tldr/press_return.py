@@ -1,4 +1,11 @@
-#!/bin/env python3
+'''presses return key is all'''
 from pykeyboard import PyKeyboard as PyK
-k = PyK()
-k.tap_key(k.return_key)
+
+
+def tap_return():
+    '''single press of return key'''
+    k = PyK()
+    k.tap_key(k.return_key)
+
+
+tap_return()

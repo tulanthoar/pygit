@@ -2,6 +2,7 @@
 from time import sleep
 from click import echo, getchar, command
 from sh import Command
+from pykeyboard import PyKeyboard
 
 
 def print_menu(persist):
@@ -42,14 +43,15 @@ def xdomenu():
                    'r': ('ranger'),
                    'a': ('allpads'),
                    'P': ('pomodoro')}
-    xdo = Command('xdotool')
+    keybrd = PyKeyboard()
+    k_menu = keybrd.menu_key
     persistent = False
     print_menu(persistent)
     while True:
         char = getchar()
         try:
             (opts) = char_to_bin[char]
-            xmc('minone')
+            keybrd.tap_key(k_menu)
             xmc(opts)
         except KeyError:
             if char == '\t':
@@ -61,6 +63,4 @@ def xdomenu():
                 continue
         sleep(0.5)
         if persistent:
-            xmc('rest')
-            continue
-        xdo(['key', 'Menu'])
+            keybrd.tap_key(k_menu)
