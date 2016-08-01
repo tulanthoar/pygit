@@ -1,12 +1,10 @@
-#!/usr/bin/env python
 '''check the flight times for dhl freight flights'''
 from time import sleep
-
 from bs4 import BeautifulSoup
 from requests import Session, post
 from requests.exceptions import (HTTPError, MissingSchema, InvalidURL)
-from colorama import init
 from termcolor import colored
+from click import command
 
 
 def find_nc(tagl, tag):
@@ -32,9 +30,9 @@ def soup_t(soup_text):
         return None
 
 
+@command()
 def text_loop():
     '''send messages when the flights are en route'''
-    init()
     inbound_rno = ('http://flightaware.com/live/flight/SOO594', '594')
     inbound = ('http://flightaware.com/live/flight/SOO597', '597')
     night_boi = ('http://flightaware.com/live/flight/AMF1062', '1062')
@@ -45,8 +43,9 @@ def text_loop():
     with Session() as ses:
         print('session has begun')
         while True:
-            print('------------------------')
+            print(colored('------------------------', 'white'))
             for flight in flights:
+                print('')
                 try:
                     page = ses.get(flight[0])
                 except InvalidURL:
@@ -62,18 +61,15 @@ def text_loop():
                 f_num = soup_in.title.string.split('#')[0] + flight[1]
                 print(colored(f_num, 'yellow'))
                 arr = soup_t(soup_in)
-                if arr:
-                    msg = f_num + ' arrives at ' + arr
-                    print(colored(msg, 'green'))
-                    token = "EkpHuaUe6GBYfXf9JFo32UqZ3GJ1AkHbiABr3r40"
-                    npydat = {
-                        'auth_token': token,
-                        'notify': 'false',
-                        'message_format': 'text',
-                        'message': msg}
-                    post(npyurl, data=npydat)
-                print('')
+                if arr is None:
+                    continue
+                msg = f_num + ' arrives at ' + arr
+                print(colored(msg, 'green'))
+                token = "EkpHuaUe6GBYfXf9JFo32UqZ3GJ1AkHbiABr3r40"
+                npydat = {
+                    'auth_token': token,
+                    'notify': 'false',
+                    'message_format': 'text',
+                    'message': msg}
+                post(npyurl, data=npydat)
             sleep(300)
-
-
-text_loop()
