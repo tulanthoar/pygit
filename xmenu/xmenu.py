@@ -52,6 +52,7 @@ def xdomenu():
         try:
             (opts) = char_to_bin[char]
             keybrd.tap_key(k_menu)
+            sleep(0.1)
             xmc(opts)
         except KeyError:
             if char == '\t':
@@ -61,6 +62,6 @@ def xdomenu():
             elif char == ' ':
                 xmc('nextempty')
                 continue
-        sleep(0.5)
+        sleep(0.1)
         if persistent:
             keybrd.tap_key(k_menu)
