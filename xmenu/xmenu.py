@@ -1,8 +1,9 @@
 '''menu to interface with xmonad'''
 from time import sleep
+
 from click import echo, getchar, command
-from sh import Command
 from pykeyboard import PyKeyboard
+from sh import Command
 
 
 def print_menu(persist):
