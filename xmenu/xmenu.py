@@ -37,38 +37,36 @@ def xdoprint():
 @command()
 def xdomenu():
     """interacts with a simple menu."""
-    char_to_bin = {'q': ('srmenu'),
-                   'b': ('byobu'),
-                   'c': ('clipmenu'),
-                   'j': ('jmenu'),
-                   'n': ('nvim'),
-                   'h': ('htop'),
-                   'u': ('myterm'),
-                   'i': ('ipython'),
-                   'p': ('perl'),
-                   'r': ('ranger'),
-                   'a': ('allpads'),
-                   'P': ('pomodoro')}
+    char_to_bin = {'q': 'srmenu',
+                   'b': 'byobu',
+                   'c': 'clipmenu',
+                   'j': 'jmenu',
+                   'n': 'nvim',
+                   'h': 'htop',
+                   'u': 'myterm',
+                   'i': 'ipython',
+                   'p': 'perl',
+                   'r': 'ranger',
+                   ' ': 'nextempty',
+                   'a': 'allpads',
+                   'P': 'pomodoro'}
     keybrd = PyKeyboard()
     k_menu = keybrd.menu_key
     persistent = False
     while True:
         char = getchar()
         try:
-            (opts) = char_to_bin[char]
+            opts = char_to_bin[char]
             keybrd.tap_key(k_menu)
-            # sleep(0.1)
             echo(opts)
+            sleep(0.15)
             stdout.flush()
+            if persistent:
+                sleep(0.2)
+                keybrd.tap_key(k_menu)
         except KeyError:
             if char == '\t':
                 persistent = not persistent
                 print_menu(persistent)
-            elif char == ' ':
-                echo('nextempty')
             else:
                 keybrd.tap_key(k_menu)
-            continue
-        if persistent:
-            sleep(0.1)
-            keybrd.tap_key(k_menu)
