@@ -7,10 +7,12 @@ setup(
     py_modules=['xmenu'],
     install_requires=[
         'Click',
-        'sh'
+        'sh',
+        'PyUserInput'
     ],
     entry_points='''
         [console_scripts]
         xmenu=xmenu:xdomenu
+        print_xmnu=xmenu:xdoprint
     ''',
 )
