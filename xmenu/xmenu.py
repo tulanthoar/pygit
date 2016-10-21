@@ -2,47 +2,38 @@
 from sys import stdout
 from time import sleep
 
-from click import echo, getchar, command
+from click import getchar, command
 from pykeyboard import PyKeyboard
+
+
+def print_flush(text, time=0.01):
+    '''print then-flush-for-xmctl'''
+    print(text)
+    sleep(time)
+    stdout.flush()
 
 
 def print_menu(persist):
     '''print menu of available keys'''
-    print('saysomethingnext empty wsnewlineSpc: next empty ws')
-    sleep(0.5)
-    stdout.flush()
-    print('2saysomethingnext empty wsnewlineSpc: next empty ws')
-    sleep(0.5)
-    stdout.flush()
-    print('3saysomethingnext empty wsnewlineSpc: next empty ws')
-    sleep(0.5)
-    stdout.flush()
-    # stdout.flush()
-    # print('Available cmds',flush=True)
-    # echo('Spc: next empty ws')
-    # echo('Tab: toggle persist')
-    # echo('  a: all pads')
-    # echo('  b: byobu')
-    # echo('  c: clipmenu')
-    # echo('  h: htop')
-    # echo('  i: ipython')
-    # echo('  j: j4-app-menu')
-    # echo('  n: neovim')
-    # echo('  q: qutebrowser')
-    # echo('  p: perl repl')
-    # echo('  P: pomodoro')
-    # echo('  r: ranger')
-    # echo('  u: urxvt')
-    # if persist:
-    #     echo('Persistence on')
-    # else:
-    #     echo('Persistence off')
-
-
-@command()
-def xdoprint():
-    '''just pring the menu alone'''
-    print_menu(False)
+    print_flush('Available cmds')
+    print_flush('Spc: next empty ws')
+    print_flush('Tab: toggle persist')
+    print_flush('  a: all pads')
+    print_flush('  b: byobu')
+    print_flush('  c: clipmenu')
+    print_flush('  h: htop')
+    print_flush('  i: ipython')
+    print_flush('  j: j4-app-menu')
+    print_flush('  n: neovim')
+    print_flush('  q: qutebrowser')
+    print_flush('  p: perl repl')
+    print_flush('  P: pomodoro')
+    print_flush('  r: ranger')
+    print_flush('  u: urxvt')
+    if persist:
+        print_flush('Persistence on')
+    else:
+        print_flush('Persistence off')
 
 
 @command()
@@ -64,13 +55,14 @@ def xdomenu():
     keybrd = PyKeyboard()
     k_menu = keybrd.menu_key
     persistent = False
+    print_menu(persistent)
     while True:
         sleep(0.5)
         stdout.flush()
         char = getchar()
         try:
             cmd = char_to_bin[char]
-            keybrd.tap_key(k_menu)
+            # keybrd.tap_key(k_menu)
             print(cmd)
             sleep(0.15)
             stdout.flush()

@@ -13,6 +13,5 @@ setup(
     entry_points='''
         [console_scripts]
         xmenu=xmenu:xdomenu
-        print_xmenu=xmenu:xdoprint
     ''',
 )
