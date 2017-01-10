@@ -14,36 +14,46 @@ class MyEventHandler(FileSystemEventHandler):
     """Logs all the events captured."""
 
     def __init__(self, logfile, run_handler):
+        """pass logfile to be opened and handler to flush writing the file"""
         super(MyEventHandler, self).__init__()
         self.run_log = Logger('Runs')
-        self.file_log = Logger('Files')
+        self.fs_log = Logger('Files')
         socket_path = environ.get("NVIM_LISTEN_ADDRESS")
         self.nvim = attach('socket', path=socket_path)
         self.log_file = logfile
         self.run_handler = run_handler
 
     def on_moved(self, event):
+        """called when a file or folder is moved"""
         super(MyEventHandler, self).on_moved(event)
         what = 'directory' if event.is_directory else 'file'
-        self.file_log.info("Moved {}: from {} to {}".format(what, event.src_path, event.dest_path))
+        log_msg = "Moved {}: from {} to {}".format(what, event.src_path, event.dest_path)
+        self.fs_log.info(log_msg)
 
     def on_created(self, event):
+        """called on creation of a file or folder"""
         super(MyEventHandler, self).on_created(event)
         what = 'directory' if event.is_directory else 'file'
-        self.file_log.info("Created {}: {}".format(what, event.src_path))
+        self.fs_log.info("Created {}: {}".format(what, event.src_path))
 
     def on_deleted(self, event):
+        """called on deletion of a file or folder"""
         super(MyEventHandler, self).on_deleted(event)
         what = 'directory' if event.is_directory else 'file'
-        self.file_log.info("Deleted {}: {}".format(what, event.src_path))
+        self.fs_log.info("Deleted {}: {}".format(what, event.src_path))
 
     def on_modified(self, event):
+        """when a file is modified the event is logged and appended to a separate file
+        Then the script is run through python and the output is (over)written to self.log_file
+        and appended to the file handled by the info handler"""
         super(MyEventHandler, self).on_modified(event)
         what = 'directory' if event.is_directory else 'file'
-        self.file_log.info("Modified {}: {}".format(what, event.src_path))
+        self.fs_log.info("Modified {}: {}".format(what, event.src_path))
         event_path = Path(event.src_path) # using plain src_path gives nonexistent path
         if event_path.is_file():
-            self.run_log.notice('Output:\n{}'.format(python(str(event_path))))
+            in_file = str(event_path)
+            out_str = python(in_file)
+            self.run_log.notice('Output:\n{}'.format(out_str))
             self.run_handler.close()
             self.nvim.command('pedit ' + self.log_file)
 
@@ -51,13 +61,14 @@ class MyEventHandler(FileSystemEventHandler):
 def main():
     """watch a specific directory, logging changes and
     running python scripts when they are written to disk"""
-    run_logfile = environ.get('HOME')+'/pyrun.log'
-    watchdog_logfile = environ.get('HOME')+'/pydir.log'
-    run_log = FileHandler(run_logfile, level='NOTICE', bubble=True, mode='w', delay=True)
-    file_log = FileHandler(watchdog_logfile, level='INFO', bubble=True)
+    home_dir = Path(environ.get('HOME'))
+    run_logfile = home_dir / 'pyrun.log'
+    watchdog_logfile = home_dir / 'pydir.log'
+    run_log = FileHandler(str(run_logfile), level='NOTICE', bubble=True, mode='w', delay=True)
+    file_log = FileHandler(str(watchdog_logfile), level='INFO', bubble=True)
     with run_log.applicationbound():
         with file_log.applicationbound():
-            watched_dir = Path(environ.get('HOME')) / 'code' / 'pyrep' / 'coderunner' / 'snippets'
+            watched_dir = home_dir / 'code' / 'pyrep' / 'coderunner' / 'snippets'
             handler = MyEventHandler(run_logfile, run_log)
             obs = InotifyObserver()
             obs.schedule(handler, str(watched_dir), False)
